@@ -141,6 +141,82 @@ void THTensor_(indexCopy)(THTensor *tensor, int dim, THLongTensor *index, THTens
   THLongTensor_free(index);
 }
 
+
+void THTensor_(indexSum)(THTensor *tensor, int dim, THLongTensor *index, THTensor *src)
+{
+  long i, numel;
+  THTensor *tSlice, *sSlice;
+  long *index_data;
+
+  numel = THLongTensor_nElement(index);
+  THArgCheck(index->nDimension == 1, 3, "Index is supposed to be a vector");
+  THArgCheck(dim < src->nDimension,4,"Indexing dim is out of bounds");
+  THArgCheck(numel == src->size[dim],4,"Number of indices should be equal to source:size(dim)");
+
+  index = THLongTensor_newContiguous(index);
+  index_data = THLongTensor_data(index);
+
+  for (i=0; i<numel; i++)
+  {
+    if (tensor->nDimension > 1 )
+    {
+      tSlice = THTensor_(new)();
+      sSlice = THTensor_(new)();
+      THTensor_(select)(tSlice, tensor, dim, index_data[i]-1);
+      THTensor_(select)(sSlice, src, dim, i);
+      THTensor_(cadd)(tSlice, tSlice, 1, sSlice);
+      THTensor_(free)(tSlice);
+      THTensor_(free)(sSlice);
+    }
+    else
+    {
+      
+      long idx = index_data[i]-1;
+      THTensor_(set1d)(tensor, idx, THTensor_(get1d)(src,i) + THTensor_(get1d)(tensor, idx));
+    }
+  }
+  THLongTensor_free(index);
+}
+
+
+void THTensor_(indexProd)(THTensor *tensor, int dim, THLongTensor *index, THTensor *src)
+{
+  long i, numel;
+  THTensor *tSlice, *sSlice;
+  long *index_data;
+
+  numel = THLongTensor_nElement(index);
+  THArgCheck(index->nDimension == 1, 3, "Index is supposed to be a vector");
+  THArgCheck(dim < src->nDimension,4,"Indexing dim is out of bounds");
+  THArgCheck(numel == src->size[dim],4,"Number of indices should be equal to source:size(dim)");
+
+  index = THLongTensor_newContiguous(index);
+  index_data = THLongTensor_data(index);
+
+  for (i=0; i<numel; i++)
+  {
+    if (tensor->nDimension > 1 )
+    {
+      tSlice = THTensor_(new)();
+      sSlice = THTensor_(new)();
+      THTensor_(select)(tSlice, tensor, dim, index_data[i]-1);
+      THTensor_(select)(sSlice, src, dim, i);
+      THTensor_(cmul)(tSlice, tSlice, sSlice);
+      THTensor_(free)(tSlice);
+      THTensor_(free)(sSlice);
+    }
+    else
+    {
+      long idx = index_data[i]-1;
+      THTensor_(set1d)(tensor, idx, THTensor_(get1d)(src,i) * THTensor_(get1d)(tensor, idx));
+    }
+  }
+  THLongTensor_free(index);
+}
+
+
+
+
 void THTensor_(indexFill)(THTensor *tensor, int dim, THLongTensor *index, real val)
 {
   long i, numel;
@@ -1204,6 +1280,8 @@ TENSOR_IMPLEMENT_LOGICAL(ge,>=)
 TENSOR_IMPLEMENT_LOGICAL(eq,==)
 TENSOR_IMPLEMENT_LOGICAL(ne,!=)
 
+
+
 #define LAB_IMPLEMENT_BASIC_FUNCTION(NAME, CFUNC)             \
   void THTensor_(NAME)(THTensor *r_, THTensor *t)                \
   {                                                           \
@@ -1226,6 +1304,27 @@ LAB_IMPLEMENT_BASIC_FUNCTION(abs,labs)
 LAB_IMPLEMENT_BASIC_FUNCTION(abs,abs)
 #endif /* int only part */
 
+void THTensor_(emax)(THTensor *r_, THTensor *t, real value)              
+{                                                                     
+  THTensor_(resizeAs)(r_, t);                                         
+  TH_TENSOR_APPLY2(real, t, real, r_, *r__data = (*t_data > value ? *t_data : value); ); 
+}   
+
+
+void THTensor_(emin)(THTensor *r_, THTensor *t, real value)              
+{                                                                     
+  THTensor_(resizeAs)(r_, t);                                         
+  TH_TENSOR_APPLY2(real, t, real, r_, *r__data = *t_data < value ? *t_data : value; ); 
+}
+
+void THTensor_(clamp)(THTensor *r_, THTensor *t, real min, real max)              
+{                                                                     
+  THTensor_(resizeAs)(r_, t);                                         
+  TH_TENSOR_APPLY2(real, t, real, r_, *r__data = *t_data < min ? min : (*t_data > max ? max : *t_data); ); 
+}
+
+
+
 /* floating point only now */
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
 
@@ -1246,6 +1345,8 @@ LAB_IMPLEMENT_BASIC_FUNCTION(sqrt,sqrt)
 LAB_IMPLEMENT_BASIC_FUNCTION(ceil,ceil)
 LAB_IMPLEMENT_BASIC_FUNCTION(floor,floor)
 LAB_IMPLEMENT_BASIC_FUNCTION(abs,fabs)
+
+
 
 void THTensor_(atan2)(THTensor *r_, THTensor *tx, THTensor *ty)
 {
@@ -1572,5 +1673,20 @@ void THTensor_(histc)(THTensor *hist, THTensor *tensor, long nbins, real minvalu
   THTensor_(free)(clone);
 }
 
-#endif /* floating point only part */
+  void THTensor_(mod)(THTensor *r_, THTensor *t, real value)              
+  {                                                                     
+    THTensor_(resizeAs)(r_, t);                                         
+    TH_TENSOR_APPLY2(real, t, real, r_, *r__data = fmod(*t_data, value); ); 
+  }   
+
+#else /* floating point only part */
+
+  void THTensor_(mod)(THTensor *r_, THTensor *t, real value)              
+  {                                                                     
+    THTensor_(resizeAs)(r_, t);                                         
+    TH_TENSOR_APPLY2(real, t, real, r_, *r__data = *t_data % value; ); 
+  }   
+
+#endif /* integer only part */
+
 #endif

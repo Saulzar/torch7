@@ -13,6 +13,10 @@ TH_API void THTensor_(indexSelect)(THTensor *tensor, THTensor *src, int dim, THL
 TH_API void THTensor_(indexCopy)(THTensor *tensor, int dim, THLongTensor *index, THTensor *src);
 TH_API void THTensor_(indexFill)(THTensor *tensor, int dim, THLongTensor *index, real val);
 
+TH_API void THTensor_(indexSum)(THTensor *tensor, int dim, THLongTensor *index, THTensor *src);
+TH_API void THTensor_(indexProd)(THTensor *tensor, int dim, THLongTensor *index, THTensor *src);
+
+
 TH_API accreal THTensor_(dot)(THTensor *t, THTensor *src);
   
 TH_API real THTensor_(minall)(THTensor *t);
@@ -39,6 +43,13 @@ TH_API void THTensor_(match)(THTensor *r_, THTensor *m1, THTensor *m2, real gain
 TH_API long THTensor_(numel)(THTensor *t);
 TH_API void THTensor_(max)(THTensor *values_, THLongTensor *indices_, THTensor *t, int dimension);
 TH_API void THTensor_(min)(THTensor *values_, THLongTensor *indices_, THTensor *t, int dimension);
+
+TH_API void THTensor_(emax)(THTensor *r_, THTensor *t, real value);              
+TH_API void THTensor_(emin)(THTensor *r_, THTensor *t, real value);              
+TH_API void THTensor_(clamp)(THTensor *r_, THTensor *t, real min, real max);              
+
+TH_API void THTensor_(mod)(THTensor *r_, THTensor *t, real value);
+
 TH_API void THTensor_(sum)(THTensor *r_, THTensor *t, int dimension);
 TH_API void THTensor_(prod)(THTensor *r_, THTensor *t, int dimension);
 TH_API void THTensor_(cumsum)(THTensor *r_, THTensor *t, int dimension);

@@ -753,6 +753,48 @@ static void THTensor_random1__(THTensor *self, THGenerator *gen, long b)
               {{name=real},
                {name=real, creturned=true}})
    end
+   
+
+      wrap("pow",
+           cname("pow"),
+           {{name=Tensor, default=true, returned=true, method={default='nil'}},
+            {name=Tensor, method={default=1}},
+            {name=real}},
+           "pow",
+           {{name=real},
+            {name=real},
+            {name=real, creturned=true}})
+
+      wrap("mod",
+           cname("mod"),
+           {{name=Tensor, default=true, returned=true, method={default='nil'}},
+            {name=Tensor, method={default=1}},
+            {name=real}}
+          )
+            
+      wrap("emax",
+           cname("emax"),
+           {{name=Tensor, default=true, returned=true, method={default='nil'}},
+            {name=Tensor, method={default=1}},
+            {name=real}}
+          )
+            
+      wrap("emin",
+           cname("emin"),
+           {{name=Tensor, default=true, returned=true, method={default='nil'}},
+            {name=Tensor, method={default=1}},
+            {name=real}}
+          )
+
+        wrap("clamp",
+           cname("clamp"),
+           {{name=Tensor, default=true, returned=true, method={default='nil'}},
+            {name=Tensor, method={default=1}},
+            {name=real},
+            {name=real}}
+          )
+   
+   
 
    if Tensor == 'FloatTensor' or Tensor == 'DoubleTensor' then
 
@@ -849,6 +891,8 @@ static void THTensor_random1__(THTensor *self, THGenerator *gen, long b)
               {{name=real},
                {name=real, creturned=true}})
 
+               
+
       wrap("atan2",
            cname("atan2"),
            {{name=Tensor, default=true, returned=true, method={default='nil'}},
@@ -859,17 +903,7 @@ static void THTensor_random1__(THTensor *self, THGenerator *gen, long b)
             {name=real},
             {name=real, creturned=true}}
             )
-
-      wrap("pow",
-           cname("pow"),
-           {{name=Tensor, default=true, returned=true, method={default='nil'}},
-            {name=Tensor, method={default=1}},
-            {name=real}},
-           "pow",
-           {{name=real},
-            {name=real},
-            {name=real, creturned=true}})
-
+          
       wrap("rand",
            cname("rand"),
            {{name=Tensor, default=true, returned=true, method={default='nil'}},
